@@ -9,7 +9,7 @@
     <version>7</version>
   </parent>
 
-  <groupId>com.squareup.wire</groupId>
+  <groupId>com.bb.wire</groupId>
   <artifactId>wire</artifactId>
   <packaging>pom</packaging>
   <version>1.8.0-SNAPSHOT</version>
@@ -19,11 +19,22 @@
   <inceptionYear>2013</inceptionYear>
 
   <scm>
-    <url>https://github.com/square/wire</url>
-    <connection>scm:git:https://github.com/square/wire.git</connection>
-    <developerConnection>scm:git:git@github.com:square/wire.git</developerConnection>
-    <tag>HEAD</tag>
+      <url>https://github.com/brandingbrand/wire</url>
+      <connection>scm:git:git://github.com/brandingbrand/wire</connection>
+      <developerConnection>scm:git:ssh://git@github.com/brandingbrand/wire.git</developerConnection>
+      <tag>HEAD</tag>
   </scm>
+
+  <distributionManagement>
+      <repository>
+          <id>bb.nexus.repo</id>
+          <url>https://nexus.brandingbrand.com/nexus/content/repositories/releases</url>
+      </repository>
+      <snapshotRepository>
+          <id>bb.nexus.repo.snapshots</id>
+          <url>https://nexus.brandingbrand.com/nexus/content/repositories/snapshots</url>
+      </snapshotRepository>
+  </distributionManagement>
 
   <organization>
     <name>Square, Inc.</name>
@@ -94,15 +105,6 @@
         <configuration>
           <source>${java.version}</source>
           <target>${java.version}</target>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.1</version>
-        <configuration>
-          <additionalparam>-Xdoclint:none</additionalparam>
         </configuration>
       </plugin>
 
