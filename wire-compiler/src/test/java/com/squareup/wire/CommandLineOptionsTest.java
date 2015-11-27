@@ -1,46 +1,59 @@
 package com.squareup.wire;
 
+import com.squareup.wire.schema.ProtoType;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 public class CommandLineOptionsTest {
 
-  @Test public void protoPath() throws Exception {
-    CommandLineOptions options = new CommandLineOptions();
-    assertNull(options.protoPath);
-
-    options = new CommandLineOptions("--proto_path=foo/bar");
-    assertEquals("foo/bar", options.protoPath);
+  @Test public void unknownArgumentFails() throws WireException {
+    try {
+      WireCompiler.forArgs("--do-work");
+      fail();
+    } catch (IllegalArgumentException e) {
+      assertThat(e).hasMessage("Unknown argument '--do-work'.");
+    }
   }
 
-  @Test public void javaOut() throws Exception{
-    CommandLineOptions options = new CommandLineOptions();
-    assertNull(options.javaOut);
+  @Test public void protoPaths() throws Exception {
+    WireCompiler compiler = WireCompiler.forArgs("--java_out=.");
+    assertThat(compiler.protoPaths).isEmpty();
 
-    options = new CommandLineOptions("--java_out=baz/qux");
-    assertEquals("baz/qux", options.javaOut);
+    compiler = WireCompiler.forArgs("--java_out=.", "--proto_path=foo/bar");
+    assertThat(compiler.protoPaths).containsOnly("foo/bar");
+
+    compiler = WireCompiler.forArgs(
+        "--java_out=.", "--proto_path=foo/bar", "--proto_path=one/two", "--proto_path=three/four");
+    assertThat(compiler.protoPaths).containsExactly("foo/bar", "one/two", "three/four");
+  }
+
+  @Test public void javaOut() throws Exception {
+    try {
+      WireCompiler.forArgs();
+      fail();
+    } catch (WireException expected) {
+    }
+
+    WireCompiler compiler = WireCompiler.forArgs("--java_out=baz/qux");
+    assertThat(compiler.javaOut).isEqualTo("baz/qux");
   }
 
   @Test public void sourceFileNames() throws Exception {
-    CommandLineOptions options = new CommandLineOptions();
-    assertTrue(options.sourceFileNames.isEmpty());
+    WireCompiler compiler = WireCompiler.forArgs("--java_out=.");
+    assertThat(compiler.sourceFileNames).isEmpty();
 
-    List<String> expected = new ArrayList<String>();
-    options = new CommandLineOptions("baz", "qux");
+    List<String> expected = new ArrayList<>();
+    compiler = WireCompiler.forArgs("--java_out=.", "baz", "qux");
     expected.add("baz");
     expected.add("qux");
-    assertEquals(expected, options.sourceFileNames);
+    assertThat(compiler.sourceFileNames).isEqualTo(expected);
   }
 
   @Test public void sourceFileNamesFromInclude() throws Exception {
@@ -51,82 +64,33 @@ public class CommandLineOptionsTest {
       out.println("bar");
       out.close();
 
-      CommandLineOptions options = new CommandLineOptions("--files=" + tmpFile.getAbsolutePath());
-      List<String> expected = new ArrayList<String>();
+      WireCompiler compiler = WireCompiler.forArgs(
+          "--java_out=.", "--files=" + tmpFile.getAbsolutePath());
+      List<String> expected = new ArrayList<>();
       expected.add("foo");
       expected.add("bar");
-      assertEquals(expected, options.sourceFileNames);
+      assertThat(compiler.sourceFileNames).isEqualTo(expected);
 
       // Test both --files and bare filenames together
-      options = new CommandLineOptions("--files=" + tmpFile.getAbsolutePath(), "baz");
+      compiler = WireCompiler.forArgs(
+          "--java_out=.", "--files=" + tmpFile.getAbsolutePath(), "baz");
       expected.add("baz");
-      assertEquals(expected, options.sourceFileNames);
+      assertThat(compiler.sourceFileNames).isEqualTo(expected);
     } finally {
       tmpFile.delete();
     }
   }
 
   @Test public void roots() throws Exception {
-    CommandLineOptions options = new CommandLineOptions();
-    assertTrue(options.roots.isEmpty());
+    WireCompiler compiler = WireCompiler.forArgs("--java_out=.");
+    assertThat(compiler.identifierSet.isEmpty()).isTrue();
 
-    options = new CommandLineOptions("--roots=com.example.foo");
-    List<String> expected = new ArrayList<String>();
-    expected.add("com.example.foo");
-    assertEquals(expected, options.roots);
-    options = new CommandLineOptions("--roots=com.example.foo,com.example.bar");
-    expected.add("com.example.bar");
-    assertEquals(expected, options.roots);
+    compiler = WireCompiler.forArgs("--java_out=.", "--includes=com.example.Foo");
+    assertThat(compiler.identifierSet.includes(ProtoType.get("com.example.Foo"))).isTrue();
+    assertThat(compiler.identifierSet.includes(ProtoType.get("com.example.Bar"))).isFalse();
+
+    compiler = WireCompiler.forArgs("--java_out=.", "--includes=com.example.Foo,com.example.Bar");
+    assertThat(compiler.identifierSet.includes(ProtoType.get("com.example.Foo"))).isTrue();
+    assertThat(compiler.identifierSet.includes(ProtoType.get("com.example.Bar"))).isTrue();
   }
-
-  @Test public void registryClass() throws Exception {
-    CommandLineOptions options = new CommandLineOptions();
-    assertNull(options.registryClass);
-    options = new CommandLineOptions("--registry_class=com.example.RegistryClass");
-    assertEquals("com.example.RegistryClass", options.registryClass);
-  }
-
-  @Test public void  emitOptions() throws Exception {
-    CommandLineOptions options = new CommandLineOptions();
-    assertTrue(options.emitOptions);
-
-    options = new CommandLineOptions("--no_options");
-    assertFalse(options.emitOptions);
-  }
-
-  @Test public void enumOptions() throws Exception {
-    CommandLineOptions options = new CommandLineOptions();
-    assertTrue(options.enumOptions.isEmpty());
-
-    options = new CommandLineOptions("--enum_options=foo");
-    Set<String> expected = new HashSet<String>();
-    expected.add("foo");
-    assertEquals(expected, options.enumOptions);
-    options = new CommandLineOptions("--enum_options=foo,bar");
-    expected.add("bar");
-    assertEquals(expected, options.enumOptions);
-  }
-
-  @Test public void serviceWriter() throws Exception {
-    CommandLineOptions options = new CommandLineOptions();
-    assertNull(options.serviceWriter);
-
-    String name = SimpleServiceWriter.class.getName();
-    options = new CommandLineOptions("--service_writer=" + name);
-    assertEquals("com.squareup.wire.SimpleServiceWriter", options.serviceWriter);
-  }
-
-  @Test public void serviceWriterOptions() throws Exception {
-    CommandLineOptions options = new CommandLineOptions();
-    assertTrue(options.serviceWriterOptions.isEmpty());
-
-    options = new CommandLineOptions("--service_writer_opt=foo");
-    List<String> expected = new ArrayList<String>();
-    expected.add("foo");
-    assertEquals(expected, options.serviceWriterOptions);
-    options = new CommandLineOptions("--service_writer_opt=foo", "--service_writer_opt=bar");
-    expected.add("bar");
-    assertEquals(expected, options.serviceWriterOptions);
-  }
-
 }

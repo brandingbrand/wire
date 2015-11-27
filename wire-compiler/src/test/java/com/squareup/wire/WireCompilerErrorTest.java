@@ -15,104 +15,64 @@
  */
 package com.squareup.wire;
 
-import com.squareup.javawriter.JavaWriter;
-import com.squareup.protoparser.ProtoFile;
-import com.squareup.protoparser.ProtoSchemaParser;
-import java.io.FileNotFoundException;
+import com.google.common.jimfs.Configuration;
+import com.google.common.jimfs.Jimfs;
+import com.squareup.wire.schema.SchemaException;
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.nio.file.FileSystem;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import okio.Okio;
+import okio.Source;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 public class WireCompilerErrorTest {
-
-  static class StringIO implements IO {
-    private final String protoFileName;
-    private final String source;
-    private final Map<String, StringWriter> writers = new LinkedHashMap<String, StringWriter>();
-
-    public StringIO(String protoFileName, String source) {
-      this.protoFileName = "./" + protoFileName;
-      this.source = source;
-    }
-
-    @Override
-    public ProtoFile parse(String filename) throws IOException {
-      if (filename.equals(protoFileName)) {
-        return ProtoSchemaParser.parse(filename, new StringReader(source));
-      } else {
-        throw new FileNotFoundException();
-      }
-    }
-
-    @Override
-    public JavaWriter getJavaWriter(OutputArtifact outputArtifact)
-        throws IOException {
-      StringWriter writer = new StringWriter();
-      writers.put(outputArtifact.fullClassName(), writer);
-      return new JavaWriter(writer);
-    }
-
-    public Map<String, String> getOutput() {
-      Map<String, String> output = new LinkedHashMap<String, String>();
-      for (Map.Entry<String, StringWriter> entry : writers.entrySet()) {
-        output.put(entry.getKey(), entry.getValue().toString());
-      }
-      return output;
-    }
-  }
+  FileSystem fileSystem = Jimfs.newFileSystem(Configuration.unix());
 
   /**
    * Compile a .proto containing in a String and returns the contents of each output file,
    * indexed by class name.
    */
-  private Map<String, String> compile(String source) {
-    StringIO io = new StringIO("test.proto", source);
+  private void compile(String source) throws Exception {
+    Path test = fileSystem.getPath("/source/test.proto");
+    Files.createDirectory(fileSystem.getPath("/source"));
+    Files.createDirectory(fileSystem.getPath("/target"));
+    Files.write(test, source.getBytes(UTF_8));
 
-    CommandLineOptions options = new CommandLineOptions(".",  ".", Arrays.asList("test.proto"),
-        new ArrayList<String>(), null, true, Collections.<String>emptySet(), null,
-        Collections.<String>emptyList(), false, false);
-
-    try {
-      new WireCompiler(options, io, new StringWireLogger(true)).compile();
-    } catch (WireException e) {
-      fail();
-    }
-    return io.getOutput();
+    WireCompiler compiler = WireCompiler.forArgs(fileSystem, new StringWireLogger(),
+        "--proto_path=/source", "--java_out=/target", "test.proto");
+    compiler.compile();
   }
 
-  @Test public void testCorrect() throws IOException {
-    Map<String, String> output = compile("package com.squareup.protos.test;\n"
+  @Test public void testCorrect() throws Exception {
+    compile("package com.squareup.protos.test;\n"
         + "message Simple {\n"
         + "  optional int32 f = 1;\n"
         + "}\n");
-    String generatedSource = output.get("com.squareup.protos.test.Simple");
-    assertTrue(generatedSource.contains("public final class Simple extends Message {"));
+    String generatedSource = readFile("/target/com/squareup/protos/test/Simple.java");
+    assertThat(generatedSource).contains(
+        "public final class Simple extends Message<Simple, Simple.Builder> {");
   }
 
-  @Test public void testZeroTag() {
+  @Test public void testZeroTag() throws Exception {
     try {
       compile("package com.squareup.protos.test;\n"
           + "message Simple {\n"
           + "  optional int32 f = 0;\n"
           + "}\n");
       fail();
-    } catch (IllegalArgumentException e) {
-      assertEquals("Illegal tag value: 0", e.getMessage());
+    } catch (SchemaException e) {
+      assertThat(e).hasMessage("tag is out of range: 0\n"
+          + "  for field f (/source/test.proto at 3:3)\n"
+          + "  in message com.squareup.protos.test.Simple (/source/test.proto at 2:1)");
     }
   }
 
-  @Test public void testDuplicateTag() {
+  @Test public void testDuplicateTag() throws Exception {
     try {
       compile("package com.squareup.protos.test;\n"
           + "message Simple {\n"
@@ -120,12 +80,15 @@ public class WireCompilerErrorTest {
           + "  optional int32 g = 1;\n"
           + "}\n");
       fail();
-    } catch (IllegalStateException e) {
-      assertEquals("Duplicate tag 1 in com.squareup.protos.test.Simple", e.getMessage());
+    } catch (SchemaException e) {
+      assertThat(e).hasMessage("multiple fields share tag 1:\n"
+          + "  1. f (/source/test.proto at 3:3)\n"
+          + "  2. g (/source/test.proto at 4:3)\n"
+          + "  for message com.squareup.protos.test.Simple (/source/test.proto at 2:1)");
     }
   }
 
-  @Test public void testEnumNamespace() {
+  @Test public void testEnumNamespace() throws Exception {
     try {
       compile("package com.squareup.protos.test;\n"
           + "  message Foo {\n"
@@ -140,15 +103,23 @@ public class WireCompilerErrorTest {
           + "    }\n"
           + "}\n");
       fail();
-    } catch (IllegalStateException e) {
-      assertEquals("Duplicate enum name QUIX in scope com.squareup.protos.test.Foo", e.getMessage());
+    } catch (SchemaException e) {
+      assertThat(e).hasMessage("multiple enums share constant QUIX:\n"
+          + "  1. com.squareup.protos.test.Foo.Bar.QUIX (/source/test.proto at 4:7)\n"
+          + "  2. com.squareup.protos.test.Foo.Bar2.QUIX (/source/test.proto at 10:7)\n"
+          + "  for message com.squareup.protos.test.Foo (/source/test.proto at 2:3)");
     }
   }
 
-  @Test public void testNoPackageNameIsLegal() {
-    Map<String, String> output = compile("message Simple { optional int32 f = 1; }");
-    assertTrue(output.containsKey(".Simple"));
+  @Test public void testNoPackageNameIsLegal() throws Exception {
+    compile("message Simple { optional int32 f = 1; }");
     // Output should not have a 'package' declaration.
-    assertFalse(output.get(".Simple").contains("package"));
+    assertThat(readFile("/target/Simple.java")).doesNotContain("package");
+  }
+
+  private String readFile(String path) throws IOException {
+    try (Source source = Okio.source(fileSystem.getPath(path))) {
+      return Okio.buffer(source).readUtf8();
+    }
   }
 }

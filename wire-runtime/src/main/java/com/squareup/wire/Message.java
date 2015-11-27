@@ -19,266 +19,67 @@ import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import okio.Buffer;
 import okio.ByteString;
 
-/**
- * Superclass for protocol buffer messages.
- */
-public abstract class Message implements Serializable {
+/** A protocol buffer message. */
+public abstract class Message<M extends Message<M, B>, B extends Message.Builder<M, B>>
+    implements Serializable {
   private static final long serialVersionUID = 0L;
 
-  // Hidden Wire instance that can perform work that does not require knowledge of extensions.
-  private static final Wire WIRE = new Wire();
+  /** Unknown fields, proto-encoded. We permit null to support magic deserialization. */
+  private final transient ByteString unknownFields;
 
-  /**
-   * A protocol buffer data type.
-   */
-  public enum Datatype {
-    INT32(1), INT64(2), UINT32(3), UINT64(4), SINT32(5),
-    SINT64(6), BOOL(7), ENUM(8), STRING(9), BYTES(10),
-    MESSAGE(11), FIXED32(12), SFIXED32(13), FIXED64(14),
-    SFIXED64(15), FLOAT(16), DOUBLE(17);
-
-    public static final Comparator<Datatype> ORDER_BY_NAME = new Comparator<Datatype>() {
-      @Override public int compare(Datatype o1, Datatype o2) {
-        return o1.name().compareTo(o2.name());
-      }
-    };
-
-    private static final Map<String, Datatype> TYPES_BY_NAME =
-        new LinkedHashMap<String, Datatype>();
-    static {
-      TYPES_BY_NAME.put("int32", INT32);
-      TYPES_BY_NAME.put("int64", INT64);
-      TYPES_BY_NAME.put("uint32", UINT32);
-      TYPES_BY_NAME.put("uint64", UINT64);
-      TYPES_BY_NAME.put("sint32", SINT32);
-      TYPES_BY_NAME.put("sint64", SINT64);
-      TYPES_BY_NAME.put("bool", BOOL);
-      TYPES_BY_NAME.put("enum", ENUM);
-      TYPES_BY_NAME.put("string", STRING);
-      TYPES_BY_NAME.put("bytes", BYTES);
-      TYPES_BY_NAME.put("message", MESSAGE);
-      TYPES_BY_NAME.put("fixed32", FIXED32);
-      TYPES_BY_NAME.put("sfixed32", SFIXED32);
-      TYPES_BY_NAME.put("fixed64", FIXED64);
-      TYPES_BY_NAME.put("sfixed64", SFIXED64);
-      TYPES_BY_NAME.put("float", FLOAT);
-      TYPES_BY_NAME.put("double", DOUBLE);
-    }
-
-    private final int value;
-
-    private Datatype(int value) {
-      this.value = value;
-    }
-
-    public int value() {
-      return value;
-    }
-
-    public WireType wireType() {
-      switch (this) {
-        case INT32: case INT64: case UINT32: case UINT64:
-        case SINT32: case SINT64: case BOOL: case ENUM:
-          return WireType.VARINT;
-        case FIXED32: case SFIXED32: case FLOAT:
-          return WireType.FIXED32;
-        case FIXED64: case SFIXED64: case DOUBLE:
-          return WireType.FIXED64;
-        case STRING: case BYTES: case MESSAGE:
-          return WireType.LENGTH_DELIMITED;
-        default:
-          throw new AssertionError("No wiretype for datatype " + this);
-      }
-    }
-
-    public static Datatype of(String typeString) {
-      return TYPES_BY_NAME.get(typeString);
-    }
-  }
-
-  /**
-   * A protocol buffer label. We treat "packed" as a label of its own that implies "repeated."
-   */
-  public enum Label {
-    REQUIRED(32), OPTIONAL(64), REPEATED(128), PACKED(256);
-
-    public static final Comparator<Label> ORDER_BY_NAME = new Comparator<Label>() {
-      @Override public int compare(Label o1, Label o2) {
-        return o1.name().compareTo(o2.name());
-      }
-    };
-
-    private final int value;
-
-    private Label(int value) {
-      this.value = value;
-    }
-
-    public int value() {
-      return value;
-    }
-
-    public boolean isRepeated() {
-      return this == REPEATED || this == PACKED;
-    }
-
-    public boolean isPacked() {
-      return this == PACKED;
-    }
-  }
-
-  /** Set to null until a field is added. */
-  private transient UnknownFieldMap unknownFields;
-
-  /** False upon construction or deserialization. */
-  private transient boolean haveCachedSerializedSize;
-
-  /** If {@code haveCachedSerializedSize} is true, the serialized size of this message. */
-  private transient int cachedSerializedSize;
+  /** If not {@code 0} then the serialized size of this message. */
+  transient int cachedSerializedSize = 0;
 
   /** If non-zero, the hash code of this message. Accessed by generated code. */
   protected transient int hashCode = 0;
 
-  protected Message() {
+  protected Message(ByteString unknownFields) {
+    if (unknownFields == null) {
+      throw new NullPointerException("unknownFields == null");
+    }
+    this.unknownFields = unknownFields;
   }
 
   /**
-   * Initializes any unknown field data to that stored in the given {@code Builder}.
+   * Returns a byte string containing the proto encoding of this message's unknown fields. Returns
+   * an empty byte string if this message has no unknown fields.
    */
-  protected void setBuilder(Builder builder) {
-    if (builder.unknownFieldMap != null) {
-      unknownFields = new UnknownFieldMap(builder.unknownFieldMap);
-    }
-  }
-
-  // Increase visibility for testing
-  protected Collection<List<UnknownFieldMap.FieldValue>> unknownFields() {
-    return unknownFields == null ? Collections.<List<UnknownFieldMap.FieldValue>>emptySet()
-        : unknownFields.fieldMap.values();
+  public final ByteString unknownFields() {
+    ByteString result = this.unknownFields;
+    return result != null ? result : ByteString.EMPTY;
   }
 
   /**
-   * Utility method to return a mutable copy of a given List. Used by generated code.
+   * Returns a new builder initialized with the data in this message.
    */
-  protected static <T> List<T> copyOf(List<T> source) {
-    return source == null ? null : new ArrayList<T>(source);
-  }
+  public abstract Builder<M, B> newBuilder();
 
-  /**
-   * Utility method to return an immutable copy of a given List. Used by generated code.
-   * If {@code source} is null, {@link Collections#emptyList()} is returned.
-   */
-  protected static <T> List<T> immutableCopyOf(List<T> source) {
-    if (source == null) {
-      return Collections.emptyList();
-    } else if (source instanceof MessageAdapter.ImmutableList) {
-      return source;
-    }
-    return Collections.unmodifiableList(new ArrayList<T>(source));
-  }
-
-  /**
-   * Returns the integer value tagged associated with the given enum instance.
-   * If the enum instance is not initialized with an integer tag value, an exception
-   * will be thrown.
-   *
-   * @param <E> the enum class type
-   */
-  @SuppressWarnings("unchecked")
-  public static <E extends Enum & ProtoEnum> int intFromEnum(E value) {
-    EnumAdapter<E> adapter = WIRE.enumAdapter((Class<E>) value.getClass());
-    return adapter.toInt(value);
-  }
-
-  /**
-   * Returns the enumerated value tagged with the given integer value for the
-   * given enum class. If no enum value in the given class is initialized
-   * with the given integer tag value, an exception will be thrown.
-   *
-   * @param <E> the enum class type
-   */
-  public static <E extends Enum & ProtoEnum> E enumFromInt(Class<E> enumClass, int value) {
-    EnumAdapter<E> adapter = WIRE.enumAdapter(enumClass);
-    return adapter.fromInt(value);
-  }
-
-  @SuppressWarnings("unchecked")
-  public byte[] toByteArray() {
-    return WIRE.messageAdapter((Class<Message>) getClass()).toByteArray(this);
-  }
-
-  public void writeTo(byte[] output) {
-    writeTo(output, 0, output.length);
-  }
-
-  public void writeTo(byte[] output, int offset, int count) {
-    write(WireOutput.newInstance(output, offset, count));
-  }
-
-  @SuppressWarnings("unchecked")
-  private void write(WireOutput output) {
-    MessageAdapter<Message> adapter = WIRE.messageAdapter((Class<Message>) getClass());
-    try {
-      adapter.write(this, output);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  public void writeUnknownFieldMap(WireOutput output) throws IOException {
-    if (unknownFields != null) {
-      unknownFields.write(output);
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  public int getSerializedSize() {
-    if (!haveCachedSerializedSize) {
-      MessageAdapter<Message> adapter = WIRE.messageAdapter((Class<Message>) getClass());
-      cachedSerializedSize = adapter.getSerializedSize(this);
-      haveCachedSerializedSize = true;
-    }
-    return cachedSerializedSize;
-  }
-
-  public int getUnknownFieldsSerializedSize() {
-    return unknownFields == null ? 0 : unknownFields.getSerializedSize();
-  }
-
-  protected boolean equals(Object a, Object b) {
-    return a == b || (a != null && a.equals(b));
-  }
-
-  protected boolean equals(List<?> a, List<?> b) {
-    // Canonicalize empty -> null
-    if (a != null && a.isEmpty()) a = null;
-    if (b != null && b.isEmpty()) b = null;
-    return a == b || (a != null && a.equals(b));
+  /** Returns this message with any unknown fields removed. */
+  public final M withoutUnknownFields() {
+    return newBuilder().clearUnknownFields().build();
   }
 
   @SuppressWarnings("unchecked")
   @Override public String toString() {
-    return WIRE.messageAdapter((Class<Message>) getClass()).toString(this);
+    return ProtoAdapter.get((Class<Message>) getClass()).toString(this);
   }
 
-  private Object writeReplace() throws ObjectStreamException {
+  protected final Object writeReplace() throws ObjectStreamException {
     return new MessageSerializedForm(this, getClass());
   }
 
   /**
    * Superclass for protocol buffer message builders.
    */
-  public abstract static class Builder<T extends Message> {
-
-    UnknownFieldMap unknownFieldMap;
+  public abstract static class Builder<T extends Message<T, B>, B extends Builder<T, B>> {
+    // Lazily-instantiated buffer and writer of this message's unknown fields.
+    Buffer unknownFieldsBuffer;
+    ProtoWriter unknownFieldsWriter;
 
     /**
      * Constructs a Builder with no unknown field data.
@@ -286,97 +87,155 @@ public abstract class Message implements Serializable {
     public Builder() {
     }
 
-    /**
-     * Constructs a Builder with unknown field data initialized to a copy of any unknown
-     * field data in the given {@link Message}.
-     */
-    public Builder(Message message) {
-      if (message != null && message.unknownFields != null) {
-        this.unknownFieldMap = new UnknownFieldMap(message.unknownFields);
-      }
-    }
-
-    /**
-     * Adds a {@code varint} value to the unknown field set with the given tag number.
-     */
-    public void addVarint(int tag, long value) {
-      try {
-        ensureUnknownFieldMap().addVarint(tag, value);
-      } catch (IOException e) {
-        throw new IllegalArgumentException(e.getMessage());
-      }
-    }
-
-    /**
-     * Adds a {@code fixed32} value to the unknown field set with the given tag number.
-     */
-    public void addFixed32(int tag, int value) {
-      try {
-        ensureUnknownFieldMap().addFixed32(tag, value);
-      } catch (IOException e) {
-        throw new IllegalArgumentException(e.getMessage());
-      }
-    }
-
-    /**
-     * Adds a {@code fixed64} value to the unknown field set with the given tag number.
-     */
-    public void addFixed64(int tag, long value) {
-      try {
-        ensureUnknownFieldMap().addFixed64(tag, value);
-      } catch (IOException e) {
-        throw new IllegalArgumentException(e.getMessage());
-      }
-    }
-
-    /**
-     * Adds a length delimited value to the unknown field set with the given tag number.
-     */
-    public void addLengthDelimited(int tag, ByteString value) {
-      try {
-        ensureUnknownFieldMap().addLengthDelimited(tag, value);
-      } catch (IOException e) {
-        throw new IllegalArgumentException(e.getMessage());
-      }
-    }
-
-    UnknownFieldMap ensureUnknownFieldMap() {
-      if (unknownFieldMap == null) {
-        unknownFieldMap = new UnknownFieldMap();
-      }
-      return unknownFieldMap;
-    }
-
-    /**
-     * Throws an exception if a required field has not been set.
-     */
-    public void checkRequiredFields() {
-      WIRE.builderAdapter(getClass()).checkRequiredFields(this);
-    }
-
-    /**
-     * Checks incoming {@code List}s for null elements and throws an exception if one is
-     * present. A null list is allowed.
-     *
-     * @return the incoming list.
-     * @throws NullPointerException if a null element is present in the list.
-     */
-    protected static <T> List<T> checkForNulls(List<T> elements) {
-      if (elements != null && !elements.isEmpty()) {
-        for (int i = 0, size = elements.size(); i < size; i++) {
-          T element = elements.get(i);
-          if (element == null) {
-            throw new NullPointerException("Element at index " + i + " is null");
-          }
+    public Builder<T, B> addUnknownFields(ByteString unknownFields) {
+      if (unknownFields.size() > 0) {
+        if (unknownFieldsWriter == null) {
+          unknownFieldsBuffer = new Buffer();
+          unknownFieldsWriter = new ProtoWriter(unknownFieldsBuffer);
+        }
+        try {
+          unknownFieldsWriter.writeBytes(unknownFields);
+        } catch (IOException e) {
+          throw new AssertionError();
         }
       }
-      return elements;
+      return this;
+    }
+
+    public Builder<T, B> addUnknownField(int tag, FieldEncoding fieldEncoding, Object value) {
+      if (unknownFieldsWriter == null) {
+        unknownFieldsBuffer = new Buffer();
+        unknownFieldsWriter = new ProtoWriter(unknownFieldsBuffer);
+      }
+      try {
+        ProtoAdapter<Object> protoAdapter = (ProtoAdapter<Object>) fieldEncoding.rawProtoAdapter();
+        protoAdapter.encodeWithTag(unknownFieldsWriter, tag, value);
+      } catch (IOException e) {
+        throw new AssertionError();
+      }
+      return this;
+    }
+
+    public Builder<T, B> clearUnknownFields() {
+      unknownFieldsWriter = null;
+      unknownFieldsBuffer = null;
+      return this;
     }
 
     /**
-     * Returns an immutable {@link com.squareup.wire.Message} based on the fields that have been set
-     * in this builder.
+     * Returns a byte string with this message's unknown fields. Returns an empty byte string if
+     * this message has no unknown fields.
      */
+    public ByteString buildUnknownFields() {
+      return unknownFieldsBuffer != null
+          ? unknownFieldsBuffer.clone().readByteString()
+          : ByteString.EMPTY;
+    }
+
+    /** Returns an immutable {@link Message} based on the fields that set in this builder. */
     public abstract T build();
+  }
+
+  /** <b>For generated code only.</b> */
+  protected static <T> List<T> newMutableList() {
+    return new MutableOnWriteList<>(Collections.<T>emptyList());
+  }
+
+  /** <b>For generated code only.</b> Utility method to return a mutable copy of {@code list}. */
+  protected static <T> List<T> copyOf(String name, List<T> list) {
+    if (list == null) throw new NullPointerException(name + " == null");
+    if (list == Collections.emptyList() || list instanceof ImmutableList) {
+      return new MutableOnWriteList<>(list);
+    }
+    return new ArrayList<>(list);
+  }
+
+  /** <b>For generated code only.</b> Utility method to return an immutable copy of {@code list}. */
+  protected static <T> List<T> immutableCopyOf(String name, List<T> list) {
+    if (list == null) throw new NullPointerException(name + " == null");
+    if (list instanceof MutableOnWriteList) {
+      list = ((MutableOnWriteList<T>) list).mutableList;
+    }
+    if (list == Collections.emptyList() || list instanceof ImmutableList) {
+      return list;
+    }
+    ImmutableList<T> result = new ImmutableList<>(list);
+    // Check after the list has been copied to defend against races.
+    if (result.contains(null)) {
+      throw new IllegalArgumentException(name + ".contains(null)");
+    }
+    return result;
+  }
+
+  /** <b>For generated code only.</b> */
+  protected static <T> void redactElements(List<T> list, ProtoAdapter<T> adapter) {
+    for (int i = 0, count = list.size(); i < count; i++) {
+      list.set(i, adapter.redact(list.get(i)));
+    }
+  }
+
+  /** <b>For generated code only.</b> */
+  protected static boolean equals(Object a, Object b) {
+    return a == b || (a != null && a.equals(b));
+  }
+
+  /**
+   * <b>For generated code only.</b> Create an exception for missing required fields.
+   *
+   * @param args Alternating field value and field name pairs.
+   */
+  protected static IllegalStateException missingRequiredFields(Object... args) {
+    StringBuilder sb = new StringBuilder();
+    String plural = "";
+    for (int i = 0, size = args.length; i < size; i += 2) {
+      if (args[i] == null) {
+        if (sb.length() > 0) {
+          plural = "s"; // Found more than one missing field
+        }
+        sb.append("\n  ");
+        sb.append(args[i + 1]);
+      }
+    }
+    throw new IllegalStateException("Required field" + plural + " not set:" + sb);
+  }
+
+  /**
+   * <b>For generated code only.</b> Throw {@link NullPointerException} if {@code list} or one of
+   * its items are null.
+   */
+  protected static void checkElementsNotNull(List<?> list) {
+    if (list == null) throw new NullPointerException("list == null");
+    for (int i = 0, size = list.size(); i < size; i++) {
+      Object element = list.get(i);
+      if (element == null) {
+        throw new NullPointerException("Element at index " + i + " is null");
+      }
+    }
+  }
+
+  /** Returns the number of non-null values in {@code a, b}. */
+  protected static int countNonNull(Object a, Object b) {
+    return (a != null ? 1 : 0)
+        + (b != null ? 1 : 0);
+  }
+
+  /** Returns the number of non-null values in {@code a, b, c}. */
+  protected static int countNonNull(Object a, Object b, Object c) {
+    return (a != null ? 1 : 0)
+        + (b != null ? 1 : 0)
+        + (c != null ? 1 : 0);
+  }
+
+  /** Returns the number of non-null values in {@code a, b, c, d, rest}. */
+  protected static int countNonNull(Object a, Object b, Object c, Object d, Object... rest) {
+    int result = 0;
+    if (a != null) result++;
+    if (b != null) result++;
+    if (c != null) result++;
+    if (d != null) result++;
+    for (Object o : rest) {
+      if (o != null) result++;
+    }
+    return result;
   }
 }

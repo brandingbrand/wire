@@ -26,28 +26,33 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
-import okio.ByteString;
+import java.util.Map;
 
-import static com.squareup.wire.Message.Datatype;
-import static com.squareup.wire.Message.Label;
-import static com.squareup.wire.UnknownFieldMap.UnknownFieldType;
+import static com.squareup.wire.WireField.Label;
+import static java.util.Collections.unmodifiableMap;
 
-class MessageTypeAdapter<M extends Message> extends TypeAdapter<M> {
+class MessageTypeAdapter<M extends Message<M, B>, B extends Message.Builder<M, B>>
+    extends TypeAdapter<M> {
 
   // 2^64, used to convert sint64 values >= 2^63 to unsigned decimal form
   private static final BigInteger POWER_64 = new BigInteger("18446744073709551616");
 
-  private final Wire wire;
   private final Gson gson;
-  private final Class<M> type;
+  private final RuntimeMessageAdapter<M, B> messageAdapter;
+  private final Map<String, FieldBinding<M, B>> fieldBindings;
 
   @SuppressWarnings("unchecked")
-  public MessageTypeAdapter(Wire wire, Gson gson, TypeToken<M> type) {
-    this.wire = wire;
+  public MessageTypeAdapter(Gson gson, TypeToken<M> type) {
     this.gson = gson;
-    this.type = (Class<M>) type.getRawType();
+    this.messageAdapter = RuntimeMessageAdapter.create((Class<M>) type.getRawType());
+
+    Map<String, FieldBinding<M, B>> fieldBindings = new LinkedHashMap<>();
+    for (FieldBinding<M, B> binding : messageAdapter.fieldBindings().values()) {
+      fieldBindings.put(binding.name, binding);
+    }
+    this.fieldBindings = unmodifiableMap(fieldBindings);
   }
 
   @SuppressWarnings("unchecked")
@@ -57,79 +62,22 @@ class MessageTypeAdapter<M extends Message> extends TypeAdapter<M> {
       return;
     }
 
-    MessageAdapter<M> messageAdapter = wire.messageAdapter((Class<M>) message.getClass());
     out.beginObject();
-    for (MessageAdapter.FieldInfo fieldInfo : messageAdapter.getFields()) {
-      Object value = messageAdapter.getFieldValue(message, fieldInfo);
+    for (FieldBinding<M, B> tagBinding : messageAdapter.fieldBindings().values()) {
+      Object value = tagBinding.get(message);
       if (value == null) {
         continue;
       }
-      out.name(fieldInfo.name);
-      emitJson(out, value, fieldInfo.datatype, fieldInfo.label);
+      out.name(tagBinding.name);
+      emitJson(out, value, tagBinding.singleAdapter(), tagBinding.label);
     }
-
-    if (message instanceof ExtendableMessage<?>) {
-      emitExtensions((ExtendableMessage<?>) message, out);
-    }
-
-    Collection<List<UnknownFieldMap.FieldValue>> unknownFields = message.unknownFields();
-    if (unknownFields != null) {
-      for (List<UnknownFieldMap.FieldValue> fieldList : unknownFields) {
-        int tag = fieldList.get(0).getTag();
-        out.name("" + tag);
-        out.beginArray();
-        boolean first = true;
-        for (UnknownFieldMap.FieldValue unknownField : fieldList) {
-          switch (unknownField.getWireType()) {
-            case VARINT:
-              if (first) out.value("varint");
-              out.value(unknownField.getAsLong());
-              break;
-            case FIXED32:
-              if (first) out.value("fixed32");
-              out.value(unknownField.getAsInteger());
-              break;
-            case FIXED64:
-              if (first) out.value("fixed64");
-              out.value(unknownField.getAsLong());
-              break;
-            case LENGTH_DELIMITED:
-              if (first) out.value("length-delimited");
-              out.value(unknownField.getAsBytes().base64());
-              break;
-            default:
-              throw new AssertionError("Unknown wire type " + unknownField.getWireType());
-          }
-          first = false;
-        }
-        out.endArray();
-      }
-    }
-
     out.endObject();
   }
 
   @SuppressWarnings("unchecked")
-  private <M extends ExtendableMessage<?>, E> void emitExtensions(ExtendableMessage<M> message,
-      JsonWriter out) throws IOException {
-    if (message.extensionMap == null) return;
-    for (int i = 0; i < message.extensionMap.size(); i++) {
-      Extension<M, E> extension = (Extension<M, E>) message.extensionMap.getExtension(i);
-      E value = (E) message.extensionMap.getExtensionValue(i);
-      emitExtension(extension, value, out);
-    }
-  }
-
-  private <M extends ExtendableMessage<?>, E> void emitExtension(Extension<M, E> extension,
-      E value, JsonWriter out) throws IOException {
-    out.name(extension.getName());
-    emitJson(out, value, extension.getDatatype(), extension.getLabel());
-  }
-
-  @SuppressWarnings("unchecked")
-  private void emitJson(JsonWriter out, Object value, Datatype datatype, Label label)
+  private void emitJson(JsonWriter out, Object value, ProtoAdapter<?> adapter, Label label)
       throws IOException {
-    if (datatype == Datatype.UINT64) {
+    if (adapter == ProtoAdapter.UINT64) {
       if (label.isRepeated()) {
         List<Long> longs = (List<Long>) value;
         out.beginArray();
@@ -161,27 +109,20 @@ class MessageTypeAdapter<M extends Message> extends TypeAdapter<M> {
       return null;
     }
 
-    MessageAdapter<M> messageAdapter = wire.messageAdapter(type);
-    Message.Builder<M> builder = messageAdapter.newBuilder();
+    B builder = messageAdapter.newBuilder();
     in.beginObject();
 
     while (in.peek() == JsonToken.NAME) {
       String name = in.nextName();
-      MessageAdapter.FieldInfo fieldInfo = messageAdapter.getField(name);
-      if (fieldInfo == null) {
-        Extension<ExtendableMessage<?>, ?> extension = messageAdapter.getExtension(name);
-        if (extension == null) {
-          parseUnknownField(in, builder, Integer.parseInt(name));
-        } else {
-          Type valueType = getType(extension);
-          Object value = parseValue(extension.getLabel(), valueType, parse(in));
-          ((ExtendableMessage.ExtendableBuilder) builder).setExtension(extension, value);
-        }
-      } else {
-        Type valueType = getType(fieldInfo);
-        Object value = parseValue(fieldInfo.label, valueType, parse(in));
-        messageAdapter.setBuilderField(builder, fieldInfo.tag, value);
+
+      FieldBinding<M, B> fieldBinding = fieldBindings.get(name);
+      if (fieldBinding != null) {
+        Object value = parseValue(fieldBinding.label, singleType(fieldBinding), parse(in));
+        fieldBinding.set(builder, value);
+        continue;
       }
+
+      in.skipValue();
     }
 
     in.endObject();
@@ -192,21 +133,9 @@ class MessageTypeAdapter<M extends Message> extends TypeAdapter<M> {
     return gson.fromJson(in, JsonElement.class);
   }
 
-  private Type getType(MessageAdapter.FieldInfo fieldInfo) {
-    Type valueType;
-    if (fieldInfo.datatype == Datatype.ENUM) {
-      valueType = fieldInfo.enumType;
-    } else if (fieldInfo.datatype == Datatype.MESSAGE) {
-      valueType = fieldInfo.messageType;
-    } else {
-      valueType = javaType(fieldInfo.datatype);
-    }
-    return valueType;
-  }
-
   private Object parseValue(Label label, Type valueType, JsonElement valueElement) {
     if (label.isRepeated()) {
-      List<Object> valueList = new ArrayList<Object>();
+      List<Object> valueList = new ArrayList<>();
       for (JsonElement element : valueElement.getAsJsonArray()) {
         valueList.add(readJson(valueType, element));
       }
@@ -216,66 +145,11 @@ class MessageTypeAdapter<M extends Message> extends TypeAdapter<M> {
     }
   }
 
-  private Type getType(Extension<ExtendableMessage<?>, ?> extension) {
-    Datatype datatype = extension.getDatatype();
-    if (datatype == Datatype.ENUM) {
-      return extension.getEnumType();
-    } else if (datatype == Datatype.MESSAGE) {
-      return extension.getMessageType();
-    } else {
-      return javaType(datatype);
-    }
-  }
-
-  private void parseUnknownField(JsonReader in, Message.Builder<M> builder, int tag)
-      throws IOException {
-    in.beginArray();
-    UnknownFieldType type = UnknownFieldType.of(in.nextString());
-    while (in.peek() != JsonToken.END_ARRAY) {
-      switch (type) {
-        case VARINT:
-          builder.addVarint(tag, in.nextInt());
-          break;
-        case FIXED32:
-          builder.addFixed32(tag, in.nextInt());
-          break;
-        case FIXED64:
-          builder.addFixed64(tag, in.nextInt());
-          break;
-        case LENGTH_DELIMITED:
-          builder.addLengthDelimited(tag, ByteString.decodeBase64(in.nextString()));
-          break;
-        default:
-          throw new AssertionError("Unknown field type " + type);
-      }
-    }
-    in.endArray();
-  }
-
   private Object readJson(Type valueType, JsonElement element) {
     return gson.fromJson(element, valueType);
   }
 
-  // Returns the Type used to store a given primitive scalar type.
-  @SuppressWarnings("unchecked")
-  private Type javaType(Datatype datatype) {
-    switch (datatype) {
-      case INT32:case UINT32:case SINT32:case FIXED32:case SFIXED32:
-        return int.class;
-      case INT64:case UINT64:case SINT64:case FIXED64:case SFIXED64:
-        return long.class;
-      case BOOL:
-        return boolean.class;
-      case FLOAT:
-        return float.class;
-      case DOUBLE:
-        return double.class;
-      case STRING:
-        return String.class;
-      case BYTES:
-        return ByteString.class;
-      default:
-        throw new AssertionError("Unknown datatype: " + datatype);
-    }
+  private Type singleType(FieldBinding<M, B> tagBinding) {
+    return tagBinding.singleAdapter().javaType;
   }
 }
