@@ -17,7 +17,7 @@ import java.lang.String;
 import java.util.List;
 import okio.ByteString;
 
-public final class AllTypes extends Message<AllTypes, AllTypes.Builder> {
+public class AllTypes extends Message<AllTypes, AllTypes.Builder> {
   public static final ProtoAdapter<AllTypes> ADAPTER = ProtoAdapter.newMessageAdapter(AllTypes.class);
 
   private static final long serialVersionUID = 0L;
@@ -1697,7 +1697,7 @@ public final class AllTypes extends Message<AllTypes, AllTypes.Builder> {
     return result;
   }
 
-  public static final class Builder extends Message.Builder<AllTypes, Builder> {
+  public static class Builder extends Message.Builder<AllTypes, Builder> {
     public Integer opt_int32;
 
     public Integer opt_uint32;
@@ -2796,7 +2796,7 @@ public final class AllTypes extends Message<AllTypes, AllTypes.Builder> {
     }
   }
 
-  public static final class NestedMessage extends Message<NestedMessage, NestedMessage.Builder> {
+  public static class NestedMessage extends Message<NestedMessage, NestedMessage.Builder> {
     public static final ProtoAdapter<NestedMessage> ADAPTER = ProtoAdapter.newMessageAdapter(NestedMessage.class);
 
     private static final long serialVersionUID = 0L;
@@ -2846,7 +2846,7 @@ public final class AllTypes extends Message<AllTypes, AllTypes.Builder> {
       return result;
     }
 
-    public static final class Builder extends Message.Builder<NestedMessage, Builder> {
+    public static class Builder extends Message.Builder<NestedMessage, Builder> {
       public Integer a;
 
       public Builder() {

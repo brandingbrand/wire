@@ -19,7 +19,7 @@ import okio.ByteString;
 /**
  * Describes a message type.
  */
-public final class DescriptorProto extends Message<DescriptorProto, DescriptorProto.Builder> {
+public class DescriptorProto extends Message<DescriptorProto, DescriptorProto.Builder> {
   public static final ProtoAdapter<DescriptorProto> ADAPTER = new ProtoAdapter<DescriptorProto>(FieldEncoding.LENGTH_DELIMITED, DescriptorProto.class) {
     @Override
     public int encodedSize(DescriptorProto value) {
@@ -211,7 +211,7 @@ public final class DescriptorProto extends Message<DescriptorProto, DescriptorPr
     return builder.replace(0, 2, "DescriptorProto{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<DescriptorProto, Builder> {
+  public static class Builder extends Message.Builder<DescriptorProto, Builder> {
     public String name;
 
     public List<FieldDescriptorProto> field;
@@ -311,7 +311,7 @@ public final class DescriptorProto extends Message<DescriptorProto, DescriptorPr
     }
   }
 
-  public static final class ExtensionRange extends Message<ExtensionRange, ExtensionRange.Builder> {
+  public static class ExtensionRange extends Message<ExtensionRange, ExtensionRange.Builder> {
     public static final ProtoAdapter<ExtensionRange> ADAPTER = new ProtoAdapter<ExtensionRange>(FieldEncoding.LENGTH_DELIMITED, ExtensionRange.class) {
       @Override
       public int encodedSize(ExtensionRange value) {
@@ -413,7 +413,7 @@ public final class DescriptorProto extends Message<DescriptorProto, DescriptorPr
       return builder.replace(0, 2, "ExtensionRange{").append('}').toString();
     }
 
-    public static final class Builder extends Message.Builder<ExtensionRange, Builder> {
+    public static class Builder extends Message.Builder<ExtensionRange, Builder> {
       public Integer start;
 
       public Integer end;
@@ -443,7 +443,7 @@ public final class DescriptorProto extends Message<DescriptorProto, DescriptorPr
    * fields or extension ranges in the same message. Reserved ranges may
    * not overlap.
    */
-  public static final class ReservedRange extends Message<ReservedRange, ReservedRange.Builder> {
+  public static class ReservedRange extends Message<ReservedRange, ReservedRange.Builder> {
     public static final ProtoAdapter<ReservedRange> ADAPTER = new ProtoAdapter<ReservedRange>(FieldEncoding.LENGTH_DELIMITED, ReservedRange.class) {
       @Override
       public int encodedSize(ReservedRange value) {
@@ -551,7 +551,7 @@ public final class DescriptorProto extends Message<DescriptorProto, DescriptorPr
       return builder.replace(0, 2, "ReservedRange{").append('}').toString();
     }
 
-    public static final class Builder extends Message.Builder<ReservedRange, Builder> {
+    public static class Builder extends Message.Builder<ReservedRange, Builder> {
       public Integer start;
 
       public Integer end;

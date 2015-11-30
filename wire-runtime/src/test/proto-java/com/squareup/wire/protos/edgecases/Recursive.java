@@ -15,7 +15,7 @@ import java.lang.String;
 import java.lang.StringBuilder;
 import okio.ByteString;
 
-public final class Recursive extends Message<Recursive, Recursive.Builder> {
+public class Recursive extends Message<Recursive, Recursive.Builder> {
   public static final ProtoAdapter<Recursive> ADAPTER = new ProtoAdapter<Recursive>(FieldEncoding.LENGTH_DELIMITED, Recursive.class) {
     @Override
     public int encodedSize(Recursive value) {
@@ -116,7 +116,7 @@ public final class Recursive extends Message<Recursive, Recursive.Builder> {
     return builder.replace(0, 2, "Recursive{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<Recursive, Builder> {
+  public static class Builder extends Message.Builder<Recursive, Builder> {
     public Integer value;
 
     public Recursive recursive;

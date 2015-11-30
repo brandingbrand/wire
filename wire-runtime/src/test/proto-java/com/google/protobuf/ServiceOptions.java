@@ -16,7 +16,7 @@ import java.lang.StringBuilder;
 import java.util.List;
 import okio.ByteString;
 
-public final class ServiceOptions extends Message<ServiceOptions, ServiceOptions.Builder> {
+public class ServiceOptions extends Message<ServiceOptions, ServiceOptions.Builder> {
   public static final ProtoAdapter<ServiceOptions> ADAPTER = new ProtoAdapter<ServiceOptions>(FieldEncoding.LENGTH_DELIMITED, ServiceOptions.class) {
     @Override
     public int encodedSize(ServiceOptions value) {
@@ -130,7 +130,7 @@ public final class ServiceOptions extends Message<ServiceOptions, ServiceOptions
     return builder.replace(0, 2, "ServiceOptions{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<ServiceOptions, Builder> {
+  public static class Builder extends Message.Builder<ServiceOptions, Builder> {
     public Boolean deprecated;
 
     public List<UninterpretedOption> uninterpreted_option;

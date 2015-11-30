@@ -18,7 +18,7 @@ import okio.ByteString;
 /**
  * Describes an enum type.
  */
-public final class EnumDescriptorProto extends Message<EnumDescriptorProto, EnumDescriptorProto.Builder> {
+public class EnumDescriptorProto extends Message<EnumDescriptorProto, EnumDescriptorProto.Builder> {
   public static final ProtoAdapter<EnumDescriptorProto> ADAPTER = new ProtoAdapter<EnumDescriptorProto>(FieldEncoding.LENGTH_DELIMITED, EnumDescriptorProto.class) {
     @Override
     public int encodedSize(EnumDescriptorProto value) {
@@ -130,7 +130,7 @@ public final class EnumDescriptorProto extends Message<EnumDescriptorProto, Enum
     return builder.replace(0, 2, "EnumDescriptorProto{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<EnumDescriptorProto, Builder> {
+  public static class Builder extends Message.Builder<EnumDescriptorProto, Builder> {
     public String name;
 
     public List<EnumValueDescriptorProto> value;

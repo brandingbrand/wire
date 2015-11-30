@@ -13,7 +13,7 @@ import java.lang.String;
 import java.lang.StringBuilder;
 import okio.ByteString;
 
-public final class Message extends com.squareup.wire.Message<Message, Message.Builder> {
+public class Message extends com.squareup.wire.Message<Message, Message.Builder> {
   public static final ProtoAdapter<Message> ADAPTER = new ProtoAdapter<Message>(FieldEncoding.LENGTH_DELIMITED, Message.class) {
     @Override
     public int encodedSize(Message value) {
@@ -211,7 +211,7 @@ public final class Message extends com.squareup.wire.Message<Message, Message.Bu
     return builder.replace(0, 2, "Message{").append('}').toString();
   }
 
-  public static final class Builder extends com.squareup.wire.Message.Builder<Message, Builder> {
+  public static class Builder extends com.squareup.wire.Message.Builder<Message, Builder> {
     public String unknownFields;
 
     public String other;

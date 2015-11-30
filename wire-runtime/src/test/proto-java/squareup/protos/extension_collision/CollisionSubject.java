@@ -15,7 +15,7 @@ import java.lang.String;
 import java.lang.StringBuilder;
 import okio.ByteString;
 
-public final class CollisionSubject extends Message<CollisionSubject, CollisionSubject.Builder> {
+public class CollisionSubject extends Message<CollisionSubject, CollisionSubject.Builder> {
   public static final ProtoAdapter<CollisionSubject> ADAPTER = new ProtoAdapter<CollisionSubject>(FieldEncoding.LENGTH_DELIMITED, CollisionSubject.class) {
     @Override
     public int encodedSize(CollisionSubject value) {
@@ -112,7 +112,7 @@ public final class CollisionSubject extends Message<CollisionSubject, CollisionS
     return builder.replace(0, 2, "CollisionSubject{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<CollisionSubject, Builder> {
+  public static class Builder extends Message.Builder<CollisionSubject, Builder> {
     public String f;
 
     public Builder() {

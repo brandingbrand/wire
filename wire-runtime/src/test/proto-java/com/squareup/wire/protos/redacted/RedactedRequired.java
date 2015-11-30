@@ -16,7 +16,7 @@ import java.lang.StringBuilder;
 import java.lang.UnsupportedOperationException;
 import okio.ByteString;
 
-public final class RedactedRequired extends Message<RedactedRequired, RedactedRequired.Builder> {
+public class RedactedRequired extends Message<RedactedRequired, RedactedRequired.Builder> {
   public static final ProtoAdapter<RedactedRequired> ADAPTER = new ProtoAdapter<RedactedRequired>(FieldEncoding.LENGTH_DELIMITED, RedactedRequired.class) {
     @Override
     public int encodedSize(RedactedRequired value) {
@@ -108,7 +108,7 @@ public final class RedactedRequired extends Message<RedactedRequired, RedactedRe
     return builder.replace(0, 2, "RedactedRequired{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<RedactedRequired, Builder> {
+  public static class Builder extends Message.Builder<RedactedRequired, Builder> {
     public String a;
 
     public Builder() {

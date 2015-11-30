@@ -17,7 +17,7 @@ import java.lang.StringBuilder;
 import java.util.List;
 import okio.ByteString;
 
-public final class Person extends Message<Person, Person.Builder> {
+public class Person extends Message<Person, Person.Builder> {
   public static final ProtoAdapter<Person> ADAPTER = new ProtoAdapter<Person>(FieldEncoding.LENGTH_DELIMITED, Person.class) {
     @Override
     public int encodedSize(Person value) {
@@ -154,7 +154,7 @@ public final class Person extends Message<Person, Person.Builder> {
     return builder.replace(0, 2, "Person{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<Person, Builder> {
+  public static class Builder extends Message.Builder<Person, Builder> {
     public String name;
 
     public Integer id;
@@ -247,7 +247,7 @@ public final class Person extends Message<Person, Person.Builder> {
     }
   }
 
-  public static final class PhoneNumber extends Message<PhoneNumber, PhoneNumber.Builder> {
+  public static class PhoneNumber extends Message<PhoneNumber, PhoneNumber.Builder> {
     public static final ProtoAdapter<PhoneNumber> ADAPTER = new ProtoAdapter<PhoneNumber>(FieldEncoding.LENGTH_DELIMITED, PhoneNumber.class) {
       @Override
       public int encodedSize(PhoneNumber value) {
@@ -362,7 +362,7 @@ public final class Person extends Message<Person, Person.Builder> {
       return builder.replace(0, 2, "PhoneNumber{").append('}').toString();
     }
 
-    public static final class Builder extends Message.Builder<PhoneNumber, Builder> {
+    public static class Builder extends Message.Builder<PhoneNumber, Builder> {
       public String number;
 
       public PhoneType type;

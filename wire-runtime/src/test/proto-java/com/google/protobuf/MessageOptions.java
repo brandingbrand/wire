@@ -19,7 +19,7 @@ import java.lang.StringBuilder;
 import java.util.List;
 import okio.ByteString;
 
-public final class MessageOptions extends Message<MessageOptions, MessageOptions.Builder> {
+public class MessageOptions extends Message<MessageOptions, MessageOptions.Builder> {
   public static final ProtoAdapter<MessageOptions> ADAPTER = new ProtoAdapter<MessageOptions>(FieldEncoding.LENGTH_DELIMITED, MessageOptions.class) {
     @Override
     public int encodedSize(MessageOptions value) {
@@ -320,7 +320,7 @@ public final class MessageOptions extends Message<MessageOptions, MessageOptions
     return builder.replace(0, 2, "MessageOptions{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<MessageOptions, Builder> {
+  public static class Builder extends Message.Builder<MessageOptions, Builder> {
     public Boolean message_set_wire_format;
 
     public Boolean no_standard_descriptor_accessor;

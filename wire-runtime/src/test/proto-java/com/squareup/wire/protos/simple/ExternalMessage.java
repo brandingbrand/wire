@@ -17,7 +17,7 @@ import java.lang.StringBuilder;
 import java.util.List;
 import okio.ByteString;
 
-public final class ExternalMessage extends Message<ExternalMessage, ExternalMessage.Builder> {
+public class ExternalMessage extends Message<ExternalMessage, ExternalMessage.Builder> {
   public static final ProtoAdapter<ExternalMessage> ADAPTER = new ProtoAdapter<ExternalMessage>(FieldEncoding.LENGTH_DELIMITED, ExternalMessage.class) {
     @Override
     public int encodedSize(ExternalMessage value) {
@@ -186,7 +186,7 @@ public final class ExternalMessage extends Message<ExternalMessage, ExternalMess
     return builder.replace(0, 2, "ExternalMessage{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<ExternalMessage, Builder> {
+  public static class Builder extends Message.Builder<ExternalMessage, Builder> {
     public Float f;
 
     public List<Integer> fooext;

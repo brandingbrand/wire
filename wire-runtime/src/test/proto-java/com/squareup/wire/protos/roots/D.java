@@ -15,7 +15,7 @@ import java.lang.String;
 import java.lang.StringBuilder;
 import okio.ByteString;
 
-public final class D extends Message<D, D.Builder> {
+public class D extends Message<D, D.Builder> {
   public static final ProtoAdapter<D> ADAPTER = new ProtoAdapter<D>(FieldEncoding.LENGTH_DELIMITED, D.class) {
     @Override
     public int encodedSize(D value) {
@@ -105,7 +105,7 @@ public final class D extends Message<D, D.Builder> {
     return builder.replace(0, 2, "D{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<D, Builder> {
+  public static class Builder extends Message.Builder<D, Builder> {
     public Integer i;
 
     public Builder() {

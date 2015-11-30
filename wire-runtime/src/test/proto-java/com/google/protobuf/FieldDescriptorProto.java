@@ -19,7 +19,7 @@ import okio.ByteString;
 /**
  * Describes a field within a message.
  */
-public final class FieldDescriptorProto extends Message<FieldDescriptorProto, FieldDescriptorProto.Builder> {
+public class FieldDescriptorProto extends Message<FieldDescriptorProto, FieldDescriptorProto.Builder> {
   public static final ProtoAdapter<FieldDescriptorProto> ADAPTER = new ProtoAdapter<FieldDescriptorProto>(FieldEncoding.LENGTH_DELIMITED, FieldDescriptorProto.class) {
     @Override
     public int encodedSize(FieldDescriptorProto value) {
@@ -244,7 +244,7 @@ public final class FieldDescriptorProto extends Message<FieldDescriptorProto, Fi
     return builder.replace(0, 2, "FieldDescriptorProto{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<FieldDescriptorProto, Builder> {
+  public static class Builder extends Message.Builder<FieldDescriptorProto, Builder> {
     public String name;
 
     public Integer number;

@@ -15,7 +15,7 @@ import java.lang.String;
 import java.lang.StringBuilder;
 import okio.ByteString;
 
-public final class OneField extends Message<OneField, OneField.Builder> {
+public class OneField extends Message<OneField, OneField.Builder> {
   public static final ProtoAdapter<OneField> ADAPTER = new ProtoAdapter<OneField>(FieldEncoding.LENGTH_DELIMITED, OneField.class) {
     @Override
     public int encodedSize(OneField value) {
@@ -105,7 +105,7 @@ public final class OneField extends Message<OneField, OneField.Builder> {
     return builder.replace(0, 2, "OneField{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<OneField, Builder> {
+  public static class Builder extends Message.Builder<OneField, Builder> {
     public Integer opt_int32;
 
     public Builder() {

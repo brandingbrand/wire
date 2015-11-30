@@ -14,7 +14,7 @@ import java.lang.String;
 import java.lang.StringBuilder;
 import okio.ByteString;
 
-public final class NoFields extends Message<NoFields, NoFields.Builder> {
+public class NoFields extends Message<NoFields, NoFields.Builder> {
   public static final ProtoAdapter<NoFields> ADAPTER = new ProtoAdapter<NoFields>(FieldEncoding.LENGTH_DELIMITED, NoFields.class) {
     @Override
     public int encodedSize(NoFields value) {
@@ -84,7 +84,7 @@ public final class NoFields extends Message<NoFields, NoFields.Builder> {
     return builder.replace(0, 2, "NoFields{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<NoFields, Builder> {
+  public static class Builder extends Message.Builder<NoFields, Builder> {
     public Builder() {
     }
 

@@ -14,7 +14,7 @@ import java.lang.String;
 import java.lang.StringBuilder;
 import okio.ByteString;
 
-public final class UnnecessaryResponse extends Message<UnnecessaryResponse, UnnecessaryResponse.Builder> {
+public class UnnecessaryResponse extends Message<UnnecessaryResponse, UnnecessaryResponse.Builder> {
   public static final ProtoAdapter<UnnecessaryResponse> ADAPTER = new ProtoAdapter<UnnecessaryResponse>(FieldEncoding.LENGTH_DELIMITED, UnnecessaryResponse.class) {
     @Override
     public int encodedSize(UnnecessaryResponse value) {
@@ -84,7 +84,7 @@ public final class UnnecessaryResponse extends Message<UnnecessaryResponse, Unne
     return builder.replace(0, 2, "UnnecessaryResponse{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<UnnecessaryResponse, Builder> {
+  public static class Builder extends Message.Builder<UnnecessaryResponse, Builder> {
     public Builder() {
     }
 

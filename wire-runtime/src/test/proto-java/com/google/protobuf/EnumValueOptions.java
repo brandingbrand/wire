@@ -18,7 +18,7 @@ import java.lang.StringBuilder;
 import java.util.List;
 import okio.ByteString;
 
-public final class EnumValueOptions extends Message<EnumValueOptions, EnumValueOptions.Builder> {
+public class EnumValueOptions extends Message<EnumValueOptions, EnumValueOptions.Builder> {
   public static final ProtoAdapter<EnumValueOptions> ADAPTER = new ProtoAdapter<EnumValueOptions>(FieldEncoding.LENGTH_DELIMITED, EnumValueOptions.class) {
     @Override
     public int encodedSize(EnumValueOptions value) {
@@ -172,7 +172,7 @@ public final class EnumValueOptions extends Message<EnumValueOptions, EnumValueO
     return builder.replace(0, 2, "EnumValueOptions{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<EnumValueOptions, Builder> {
+  public static class Builder extends Message.Builder<EnumValueOptions, Builder> {
     public Boolean deprecated;
 
     public List<UninterpretedOption> uninterpreted_option;

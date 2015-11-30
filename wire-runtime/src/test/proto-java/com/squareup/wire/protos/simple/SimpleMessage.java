@@ -25,7 +25,7 @@ import okio.ByteString;
 /**
  * A message for testing.
  */
-public final class SimpleMessage extends Message<SimpleMessage, SimpleMessage.Builder> {
+public class SimpleMessage extends Message<SimpleMessage, SimpleMessage.Builder> {
   public static final ProtoAdapter<SimpleMessage> ADAPTER = new ProtoAdapter<SimpleMessage>(FieldEncoding.LENGTH_DELIMITED, SimpleMessage.class) {
     @Override
     public int encodedSize(SimpleMessage value) {
@@ -299,7 +299,7 @@ public final class SimpleMessage extends Message<SimpleMessage, SimpleMessage.Bu
     return builder.replace(0, 2, "SimpleMessage{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<SimpleMessage, Builder> {
+  public static class Builder extends Message.Builder<SimpleMessage, Builder> {
     public Integer optional_int32;
 
     public NestedMessage optional_nested_msg;
@@ -433,7 +433,7 @@ public final class SimpleMessage extends Message<SimpleMessage, SimpleMessage.Bu
     }
   }
 
-  public static final class NestedMessage extends Message<NestedMessage, NestedMessage.Builder> {
+  public static class NestedMessage extends Message<NestedMessage, NestedMessage.Builder> {
     public static final ProtoAdapter<NestedMessage> ADAPTER = new ProtoAdapter<NestedMessage>(FieldEncoding.LENGTH_DELIMITED, NestedMessage.class) {
       @Override
       public int encodedSize(NestedMessage value) {
@@ -526,7 +526,7 @@ public final class SimpleMessage extends Message<SimpleMessage, SimpleMessage.Bu
       return builder.replace(0, 2, "NestedMessage{").append('}').toString();
     }
 
-    public static final class Builder extends Message.Builder<NestedMessage, Builder> {
+    public static class Builder extends Message.Builder<NestedMessage, Builder> {
       public Integer bb;
 
       public Builder() {

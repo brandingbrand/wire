@@ -20,7 +20,7 @@ import java.lang.StringBuilder;
 import java.util.List;
 import okio.ByteString;
 
-public final class FieldOptions extends Message<FieldOptions, FieldOptions.Builder> {
+public class FieldOptions extends Message<FieldOptions, FieldOptions.Builder> {
   public static final ProtoAdapter<FieldOptions> ADAPTER = new ProtoAdapter<FieldOptions>(FieldEncoding.LENGTH_DELIMITED, FieldOptions.class) {
     @Override
     public int encodedSize(FieldOptions value) {
@@ -403,7 +403,7 @@ public final class FieldOptions extends Message<FieldOptions, FieldOptions.Build
     return builder.replace(0, 2, "FieldOptions{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<FieldOptions, Builder> {
+  public static class Builder extends Message.Builder<FieldOptions, Builder> {
     public CType ctype;
 
     public Boolean packed;

@@ -406,7 +406,7 @@ public final class JavaGenerator {
     ClassName builderJavaType = javaType.nestedClass("Builder");
 
     TypeSpec.Builder builder = TypeSpec.classBuilder(javaType.simpleName());
-    builder.addModifiers(PUBLIC, FINAL);
+    builder.addModifiers(PUBLIC);
 
     if (javaType.enclosingClassName() != null) {
       builder.addModifiers(STATIC);
@@ -1001,7 +1001,7 @@ public final class JavaGenerator {
   private TypeSpec builder(NameAllocator nameAllocator, MessageType type, ClassName javaType,
       ClassName builderType) {
     TypeSpec.Builder result = TypeSpec.classBuilder("Builder")
-        .addModifiers(PUBLIC, STATIC, FINAL);
+        .addModifiers(PUBLIC, STATIC);
 
     result.superclass(builderOf(javaType, builderType));
 

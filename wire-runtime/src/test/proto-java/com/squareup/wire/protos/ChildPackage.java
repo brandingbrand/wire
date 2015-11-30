@@ -15,7 +15,7 @@ import java.lang.String;
 import java.lang.StringBuilder;
 import okio.ByteString;
 
-public final class ChildPackage extends Message<ChildPackage, ChildPackage.Builder> {
+public class ChildPackage extends Message<ChildPackage, ChildPackage.Builder> {
   public static final ProtoAdapter<ChildPackage> ADAPTER = new ProtoAdapter<ChildPackage>(FieldEncoding.LENGTH_DELIMITED, ChildPackage.class) {
     @Override
     public int encodedSize(ChildPackage value) {
@@ -112,7 +112,7 @@ public final class ChildPackage extends Message<ChildPackage, ChildPackage.Build
     return builder.replace(0, 2, "ChildPackage{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<ChildPackage, Builder> {
+  public static class Builder extends Message.Builder<ChildPackage, Builder> {
     public ForeignEnum inner_foreign_enum;
 
     public Builder() {

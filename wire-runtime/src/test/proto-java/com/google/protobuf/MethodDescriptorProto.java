@@ -18,7 +18,7 @@ import okio.ByteString;
 /**
  * Describes a method of a service.
  */
-public final class MethodDescriptorProto extends Message<MethodDescriptorProto, MethodDescriptorProto.Builder> {
+public class MethodDescriptorProto extends Message<MethodDescriptorProto, MethodDescriptorProto.Builder> {
   public static final ProtoAdapter<MethodDescriptorProto> ADAPTER = new ProtoAdapter<MethodDescriptorProto>(FieldEncoding.LENGTH_DELIMITED, MethodDescriptorProto.class) {
     @Override
     public int encodedSize(MethodDescriptorProto value) {
@@ -177,7 +177,7 @@ public final class MethodDescriptorProto extends Message<MethodDescriptorProto, 
     return builder.replace(0, 2, "MethodDescriptorProto{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<MethodDescriptorProto, Builder> {
+  public static class Builder extends Message.Builder<MethodDescriptorProto, Builder> {
     public String name;
 
     public String input_type;

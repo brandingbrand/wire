@@ -14,7 +14,7 @@ import java.lang.String;
 import java.lang.StringBuilder;
 import okio.ByteString;
 
-public final class OneBytesField extends Message<OneBytesField, OneBytesField.Builder> {
+public class OneBytesField extends Message<OneBytesField, OneBytesField.Builder> {
   public static final ProtoAdapter<OneBytesField> ADAPTER = new ProtoAdapter<OneBytesField>(FieldEncoding.LENGTH_DELIMITED, OneBytesField.class) {
     @Override
     public int encodedSize(OneBytesField value) {
@@ -104,7 +104,7 @@ public final class OneBytesField extends Message<OneBytesField, OneBytesField.Bu
     return builder.replace(0, 2, "OneBytesField{").append('}').toString();
   }
 
-  public static final class Builder extends Message.Builder<OneBytesField, Builder> {
+  public static class Builder extends Message.Builder<OneBytesField, Builder> {
     public ByteString opt_bytes;
 
     public Builder() {
