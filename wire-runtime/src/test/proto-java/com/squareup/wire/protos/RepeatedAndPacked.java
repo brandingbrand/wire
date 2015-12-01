@@ -16,7 +16,7 @@ import java.lang.StringBuilder;
 import java.util.List;
 import okio.ByteString;
 
-public final class RepeatedAndPacked extends Message<RepeatedAndPacked, RepeatedAndPacked.Builder> {
+public class RepeatedAndPacked extends Message<RepeatedAndPacked, RepeatedAndPacked.Builder> {
   public static final ProtoAdapter<RepeatedAndPacked> ADAPTER = new ProtoAdapter<RepeatedAndPacked>(FieldEncoding.LENGTH_DELIMITED, RepeatedAndPacked.class) {
     @Override
     public int encodedSize(RepeatedAndPacked value) {

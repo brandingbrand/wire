@@ -25,7 +25,7 @@ import okio.ByteString;
 /**
  * A message for testing.
  */
-public final class SimpleMessage extends Message<SimpleMessage, SimpleMessage.Builder> {
+public class SimpleMessage extends Message<SimpleMessage, SimpleMessage.Builder> {
   public static final ProtoAdapter<SimpleMessage> ADAPTER = new ProtoAdapter<SimpleMessage>(FieldEncoding.LENGTH_DELIMITED, SimpleMessage.class) {
     @Override
     public int encodedSize(SimpleMessage value) {
@@ -433,7 +433,7 @@ public final class SimpleMessage extends Message<SimpleMessage, SimpleMessage.Bu
     }
   }
 
-  public static final class NestedMessage extends Message<NestedMessage, NestedMessage.Builder> {
+  public static class NestedMessage extends Message<NestedMessage, NestedMessage.Builder> {
     public static final ProtoAdapter<NestedMessage> ADAPTER = new ProtoAdapter<NestedMessage>(FieldEncoding.LENGTH_DELIMITED, NestedMessage.class) {
       @Override
       public int encodedSize(NestedMessage value) {

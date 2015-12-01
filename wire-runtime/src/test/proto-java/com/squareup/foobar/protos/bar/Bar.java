@@ -14,7 +14,7 @@ import java.lang.String;
 import java.lang.StringBuilder;
 import okio.ByteString;
 
-public final class Bar extends Message<Bar, Bar.Builder> {
+public class Bar extends Message<Bar, Bar.Builder> {
   public static final ProtoAdapter<Bar> ADAPTER = new ProtoAdapter<Bar>(FieldEncoding.LENGTH_DELIMITED, Bar.class) {
     @Override
     public int encodedSize(Bar value) {
@@ -94,7 +94,7 @@ public final class Bar extends Message<Bar, Bar.Builder> {
     }
   }
 
-  public static final class Baz extends Message<Baz, Baz.Builder> {
+  public static class Baz extends Message<Baz, Baz.Builder> {
     public static final ProtoAdapter<Baz> ADAPTER = new ProtoAdapter<Baz>(FieldEncoding.LENGTH_DELIMITED, Baz.class) {
       @Override
       public int encodedSize(Baz value) {
@@ -174,7 +174,7 @@ public final class Bar extends Message<Bar, Bar.Builder> {
       }
     }
 
-    public static final class Moo extends Message<Moo, Moo.Builder> {
+    public static class Moo extends Message<Moo, Moo.Builder> {
       public static final ProtoAdapter<Moo> ADAPTER = new ProtoAdapter<Moo>(FieldEncoding.LENGTH_DELIMITED, Moo.class) {
         @Override
         public int encodedSize(Moo value) {

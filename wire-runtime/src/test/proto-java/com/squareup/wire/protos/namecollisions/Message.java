@@ -13,7 +13,7 @@ import java.lang.String;
 import java.lang.StringBuilder;
 import okio.ByteString;
 
-public final class Message extends com.squareup.wire.Message<Message, Message.Builder> {
+public class Message extends com.squareup.wire.Message<Message, Message.Builder> {
   public static final ProtoAdapter<Message> ADAPTER = new ProtoAdapter<Message>(FieldEncoding.LENGTH_DELIMITED, Message.class) {
     @Override
     public int encodedSize(Message value) {

@@ -14,7 +14,7 @@ import java.lang.String;
 import java.lang.StringBuilder;
 import okio.ByteString;
 
-public final class HeresAllTheDataResponse extends Message<HeresAllTheDataResponse, HeresAllTheDataResponse.Builder> {
+public class HeresAllTheDataResponse extends Message<HeresAllTheDataResponse, HeresAllTheDataResponse.Builder> {
   public static final ProtoAdapter<HeresAllTheDataResponse> ADAPTER = new ProtoAdapter<HeresAllTheDataResponse>(FieldEncoding.LENGTH_DELIMITED, HeresAllTheDataResponse.class) {
     @Override
     public int encodedSize(HeresAllTheDataResponse value) {

@@ -15,7 +15,7 @@ import java.lang.String;
 import java.lang.StringBuilder;
 import okio.ByteString;
 
-public final class ForeignMessage extends Message<ForeignMessage, ForeignMessage.Builder> {
+public class ForeignMessage extends Message<ForeignMessage, ForeignMessage.Builder> {
   public static final ProtoAdapter<ForeignMessage> ADAPTER = new ProtoAdapter<ForeignMessage>(FieldEncoding.LENGTH_DELIMITED, ForeignMessage.class) {
     @Override
     public int encodedSize(ForeignMessage value) {

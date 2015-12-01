@@ -15,7 +15,7 @@ import java.lang.String;
 import java.lang.StringBuilder;
 import okio.ByteString;
 
-public final class C extends Message<C, C.Builder> {
+public class C extends Message<C, C.Builder> {
   public static final ProtoAdapter<C> ADAPTER = new ProtoAdapter<C>(FieldEncoding.LENGTH_DELIMITED, C.class) {
     @Override
     public int encodedSize(C value) {

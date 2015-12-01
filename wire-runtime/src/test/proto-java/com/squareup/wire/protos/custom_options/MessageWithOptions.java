@@ -17,7 +17,7 @@ import java.lang.StringBuilder;
 import java.util.Arrays;
 import okio.ByteString;
 
-public final class MessageWithOptions extends Message<MessageWithOptions, MessageWithOptions.Builder> {
+public class MessageWithOptions extends Message<MessageWithOptions, MessageWithOptions.Builder> {
   public static final ProtoAdapter<MessageWithOptions> ADAPTER = new ProtoAdapter<MessageWithOptions>(FieldEncoding.LENGTH_DELIMITED, MessageWithOptions.class) {
     @Override
     public int encodedSize(MessageWithOptions value) {

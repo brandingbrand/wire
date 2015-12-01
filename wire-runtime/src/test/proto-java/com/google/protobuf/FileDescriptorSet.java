@@ -19,7 +19,7 @@ import okio.ByteString;
  * The protocol compiler can output a FileDescriptorSet containing the .proto
  * files it parses.
  */
-public final class FileDescriptorSet extends Message<FileDescriptorSet, FileDescriptorSet.Builder> {
+public class FileDescriptorSet extends Message<FileDescriptorSet, FileDescriptorSet.Builder> {
   public static final ProtoAdapter<FileDescriptorSet> ADAPTER = new ProtoAdapter<FileDescriptorSet>(FieldEncoding.LENGTH_DELIMITED, FileDescriptorSet.class) {
     @Override
     public int encodedSize(FileDescriptorSet value) {

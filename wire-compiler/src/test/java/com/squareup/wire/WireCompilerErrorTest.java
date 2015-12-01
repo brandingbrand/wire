@@ -55,7 +55,7 @@ public class WireCompilerErrorTest {
         + "}\n");
     String generatedSource = readFile("/target/com/squareup/protos/test/Simple.java");
     assertThat(generatedSource).contains(
-        "public final class Simple extends Message<Simple, Simple.Builder> {");
+        "public class Simple extends Message<Simple, Simple.Builder> {");
   }
 
   @Test public void testZeroTag() throws Exception {

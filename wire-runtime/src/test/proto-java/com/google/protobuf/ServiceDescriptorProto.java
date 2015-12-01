@@ -18,7 +18,7 @@ import okio.ByteString;
 /**
  * Describes a service.
  */
-public final class ServiceDescriptorProto extends Message<ServiceDescriptorProto, ServiceDescriptorProto.Builder> {
+public class ServiceDescriptorProto extends Message<ServiceDescriptorProto, ServiceDescriptorProto.Builder> {
   public static final ProtoAdapter<ServiceDescriptorProto> ADAPTER = new ProtoAdapter<ServiceDescriptorProto>(FieldEncoding.LENGTH_DELIMITED, ServiceDescriptorProto.class) {
     @Override
     public int encodedSize(ServiceDescriptorProto value) {

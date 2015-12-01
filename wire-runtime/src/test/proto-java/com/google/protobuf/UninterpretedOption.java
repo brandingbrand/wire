@@ -26,7 +26,7 @@ import okio.ByteString;
  * or produced by Descriptor::CopyTo()) will never have UninterpretedOptions
  * in them.
  */
-public final class UninterpretedOption extends Message<UninterpretedOption, UninterpretedOption.Builder> {
+public class UninterpretedOption extends Message<UninterpretedOption, UninterpretedOption.Builder> {
   public static final ProtoAdapter<UninterpretedOption> ADAPTER = new ProtoAdapter<UninterpretedOption>(FieldEncoding.LENGTH_DELIMITED, UninterpretedOption.class) {
     @Override
     public int encodedSize(UninterpretedOption value) {
@@ -263,7 +263,7 @@ public final class UninterpretedOption extends Message<UninterpretedOption, Unin
    * E.g.,{ ["foo", false], ["bar.baz", true], ["qux", false] } represents
    * "foo.(bar.baz).qux".
    */
-  public static final class NamePart extends Message<NamePart, NamePart.Builder> {
+  public static class NamePart extends Message<NamePart, NamePart.Builder> {
     public static final ProtoAdapter<NamePart> ADAPTER = new ProtoAdapter<NamePart>(FieldEncoding.LENGTH_DELIMITED, NamePart.class) {
       @Override
       public int encodedSize(NamePart value) {

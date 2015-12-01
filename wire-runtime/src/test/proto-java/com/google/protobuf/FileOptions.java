@@ -49,7 +49,7 @@ import okio.ByteString;
  *   If this turns out to be popular, a web service will be set up
  *   to automatically assign option numbers.
  */
-public final class FileOptions extends Message<FileOptions, FileOptions.Builder> {
+public class FileOptions extends Message<FileOptions, FileOptions.Builder> {
   public static final ProtoAdapter<FileOptions> ADAPTER = new ProtoAdapter<FileOptions>(FieldEncoding.LENGTH_DELIMITED, FileOptions.class) {
     @Override
     public int encodedSize(FileOptions value) {
