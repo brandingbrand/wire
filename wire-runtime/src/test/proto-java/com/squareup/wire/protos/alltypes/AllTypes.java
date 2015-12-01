@@ -21,7 +21,7 @@ import java.lang.StringBuilder;
 import java.util.List;
 import okio.ByteString;
 
-public final class AllTypes extends Message<AllTypes, AllTypes.Builder> {
+public class AllTypes extends Message<AllTypes, AllTypes.Builder> {
   public static final ProtoAdapter<AllTypes> ADAPTER = new ProtoAdapter<AllTypes>(FieldEncoding.LENGTH_DELIMITED, AllTypes.class) {
     @Override
     public int encodedSize(AllTypes value) {
@@ -2822,7 +2822,7 @@ public final class AllTypes extends Message<AllTypes, AllTypes.Builder> {
     }
   }
 
-  public static final class NestedMessage extends Message<NestedMessage, NestedMessage.Builder> {
+  public static class NestedMessage extends Message<NestedMessage, NestedMessage.Builder> {
     public static final ProtoAdapter<NestedMessage> ADAPTER = new ProtoAdapter<NestedMessage>(FieldEncoding.LENGTH_DELIMITED, NestedMessage.class) {
       @Override
       public int encodedSize(NestedMessage value) {

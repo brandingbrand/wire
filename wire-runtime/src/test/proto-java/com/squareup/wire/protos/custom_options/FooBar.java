@@ -24,7 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import okio.ByteString;
 
-public final class FooBar extends Message<FooBar, FooBar.Builder> {
+public class FooBar extends Message<FooBar, FooBar.Builder> {
   public static final ProtoAdapter<FooBar> ADAPTER = new ProtoAdapter<FooBar>(FieldEncoding.LENGTH_DELIMITED, FooBar.class) {
     @Override
     public int encodedSize(FooBar value) {
@@ -349,7 +349,7 @@ public final class FooBar extends Message<FooBar, FooBar.Builder> {
     }
   }
 
-  public static final class Nested extends Message<Nested, Nested.Builder> {
+  public static class Nested extends Message<Nested, Nested.Builder> {
     public static final ProtoAdapter<Nested> ADAPTER = new ProtoAdapter<Nested>(FieldEncoding.LENGTH_DELIMITED, Nested.class) {
       @Override
       public int encodedSize(Nested value) {
@@ -464,7 +464,7 @@ public final class FooBar extends Message<FooBar, FooBar.Builder> {
     }
   }
 
-  public static final class More extends Message<More, More.Builder> {
+  public static class More extends Message<More, More.Builder> {
     public static final ProtoAdapter<More> ADAPTER = new ProtoAdapter<More>(FieldEncoding.LENGTH_DELIMITED, More.class) {
       @Override
       public int encodedSize(More value) {

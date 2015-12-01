@@ -22,7 +22,7 @@ import okio.ByteString;
  * Encapsulates information about the original source file from which a
  * FileDescriptorProto was generated.
  */
-public final class SourceCodeInfo extends Message<SourceCodeInfo, SourceCodeInfo.Builder> {
+public class SourceCodeInfo extends Message<SourceCodeInfo, SourceCodeInfo.Builder> {
   public static final ProtoAdapter<SourceCodeInfo> ADAPTER = new ProtoAdapter<SourceCodeInfo>(FieldEncoding.LENGTH_DELIMITED, SourceCodeInfo.class) {
     @Override
     public int encodedSize(SourceCodeInfo value) {
@@ -220,7 +220,7 @@ public final class SourceCodeInfo extends Message<SourceCodeInfo, SourceCodeInfo
     }
   }
 
-  public static final class Location extends Message<Location, Location.Builder> {
+  public static class Location extends Message<Location, Location.Builder> {
     public static final ProtoAdapter<Location> ADAPTER = new ProtoAdapter<Location>(FieldEncoding.LENGTH_DELIMITED, Location.class) {
       @Override
       public int encodedSize(Location value) {

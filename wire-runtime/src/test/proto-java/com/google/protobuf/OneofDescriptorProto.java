@@ -17,7 +17,7 @@ import okio.ByteString;
 /**
  * Describes a oneof.
  */
-public final class OneofDescriptorProto extends Message<OneofDescriptorProto, OneofDescriptorProto.Builder> {
+public class OneofDescriptorProto extends Message<OneofDescriptorProto, OneofDescriptorProto.Builder> {
   public static final ProtoAdapter<OneofDescriptorProto> ADAPTER = new ProtoAdapter<OneofDescriptorProto>(FieldEncoding.LENGTH_DELIMITED, OneofDescriptorProto.class) {
     @Override
     public int encodedSize(OneofDescriptorProto value) {

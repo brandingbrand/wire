@@ -19,7 +19,7 @@ import okio.ByteString;
 /**
  * Describes a complete .proto file.
  */
-public final class FileDescriptorProto extends Message<FileDescriptorProto, FileDescriptorProto.Builder> {
+public class FileDescriptorProto extends Message<FileDescriptorProto, FileDescriptorProto.Builder> {
   public static final ProtoAdapter<FileDescriptorProto> ADAPTER = new ProtoAdapter<FileDescriptorProto>(FieldEncoding.LENGTH_DELIMITED, FileDescriptorProto.class) {
     @Override
     public int encodedSize(FileDescriptorProto value) {

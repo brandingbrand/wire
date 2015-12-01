@@ -16,7 +16,7 @@ import java.lang.StringBuilder;
 import java.util.List;
 import okio.ByteString;
 
-public final class EnumOptions extends Message<EnumOptions, EnumOptions.Builder> {
+public class EnumOptions extends Message<EnumOptions, EnumOptions.Builder> {
   public static final ProtoAdapter<EnumOptions> ADAPTER = new ProtoAdapter<EnumOptions>(FieldEncoding.LENGTH_DELIMITED, EnumOptions.class) {
     @Override
     public int encodedSize(EnumOptions value) {

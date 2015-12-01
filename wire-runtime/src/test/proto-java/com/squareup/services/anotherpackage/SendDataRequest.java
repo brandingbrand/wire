@@ -14,7 +14,7 @@ import java.lang.String;
 import java.lang.StringBuilder;
 import okio.ByteString;
 
-public final class SendDataRequest extends Message<SendDataRequest, SendDataRequest.Builder> {
+public class SendDataRequest extends Message<SendDataRequest, SendDataRequest.Builder> {
   public static final ProtoAdapter<SendDataRequest> ADAPTER = new ProtoAdapter<SendDataRequest>(FieldEncoding.LENGTH_DELIMITED, SendDataRequest.class) {
     @Override
     public int encodedSize(SendDataRequest value) {

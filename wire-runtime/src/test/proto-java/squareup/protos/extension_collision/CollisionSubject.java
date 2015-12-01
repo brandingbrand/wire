@@ -15,7 +15,7 @@ import java.lang.String;
 import java.lang.StringBuilder;
 import okio.ByteString;
 
-public final class CollisionSubject extends Message<CollisionSubject, CollisionSubject.Builder> {
+public class CollisionSubject extends Message<CollisionSubject, CollisionSubject.Builder> {
   public static final ProtoAdapter<CollisionSubject> ADAPTER = new ProtoAdapter<CollisionSubject>(FieldEncoding.LENGTH_DELIMITED, CollisionSubject.class) {
     @Override
     public int encodedSize(CollisionSubject value) {

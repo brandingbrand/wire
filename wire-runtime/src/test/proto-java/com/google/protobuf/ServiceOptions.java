@@ -16,7 +16,7 @@ import java.lang.StringBuilder;
 import java.util.List;
 import okio.ByteString;
 
-public final class ServiceOptions extends Message<ServiceOptions, ServiceOptions.Builder> {
+public class ServiceOptions extends Message<ServiceOptions, ServiceOptions.Builder> {
   public static final ProtoAdapter<ServiceOptions> ADAPTER = new ProtoAdapter<ServiceOptions>(FieldEncoding.LENGTH_DELIMITED, ServiceOptions.class) {
     @Override
     public int encodedSize(ServiceOptions value) {
